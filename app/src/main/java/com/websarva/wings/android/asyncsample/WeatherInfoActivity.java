@@ -92,19 +92,73 @@ public class WeatherInfoActivity extends AppCompatActivity {
             String urlStr = "http://weather.livedoor.com/forecast/webservice/json/v1?city=" + id;
             String result = "";
 
-            return result;
+            HttpURLConnection con = null;
+            //http接続のレスポンスデータとして取得するInputStreamオブジェクトを宣言。同じくtry外で宣言。
+            InputStream is = null;
+            try {
+                //URLオブジェクトを生成。
+                URL url = new URL(urlStr);
+                //URLオブジェクトからHttpURLConnectionオブジェクトを取得。
+                con = (HttpURLConnection) url.openConnection();
+                //http接続メソッドを設定。
+                con.setRequestMethod("GET");
+                //接続。
+                con.connect();
+                //HttpURLConnectionオブジェクトからレスポンスデータを取得。
+                is = con.getInputStream();
+                //レスポンスデータであるInputStreamオブジェクトを文字列に変換。
+                result = is2String(is);
+            } catch (MalformedURLException ex) {
+            } catch (IOException ex) {
+            } finally {
+                //HttpURLConnectionオブジェクトがnullでないなら解放。
+                if (con != null) {
+                    con.disconnect();
+                }
+                //InputStreamオブジェクトがnullでないなら解放。
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException ex) {
+                    }
+                }
+            }
 
+            //JSON文字列を返す。
+            return result;
         }
+
 
         @Override
         public void onPostExecute(String result) {
 
             String telop = "";
             String desc = "";
+            try {
+                JSONObject rootJSON = new JSONObject(result);
+                JSONObject descriptionJSON = rootJSON.getJSONObject("description");
+                desc = descriptionJSON.getString("text");
+                JSONArray forecasts = rootJSON.getJSONArray("forecasts");
+                JSONObject forecastNow = forecasts.getJSONObject(0);
+                telop = forecastNow.getString("telop");
+            } catch (JSONException ex) {
+            }
 
 
             _tvWeatherTelop.setText(telop);
             _tvWeatherDesc.setText(desc);
         }
+
+        private String is2String(InputStream is) throws IOException {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            StringBuffer sb = new StringBuffer();
+            char[] b = new char[1024];
+            int line;
+            while (0 <= (line = reader.read(b))) {
+                sb.append(b, 0, line);
+            }
+            return sb.toString();
+        }
     }
 }
+
