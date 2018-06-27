@@ -93,29 +93,20 @@ public class WeatherInfoActivity extends AppCompatActivity {
             String result = "";
 
             HttpURLConnection con = null;
-            //http接続のレスポンスデータとして取得するInputStreamオブジェクトを宣言。同じくtry外で宣言。
             InputStream is = null;
             try {
-                //URLオブジェクトを生成。
                 URL url = new URL(urlStr);
-                //URLオブジェクトからHttpURLConnectionオブジェクトを取得。
                 con = (HttpURLConnection) url.openConnection();
-                //http接続メソッドを設定。
                 con.setRequestMethod("GET");
-                //接続。
                 con.connect();
-                //HttpURLConnectionオブジェクトからレスポンスデータを取得。
                 is = con.getInputStream();
-                //レスポンスデータであるInputStreamオブジェクトを文字列に変換。
                 result = is2String(is);
             } catch (MalformedURLException ex) {
             } catch (IOException ex) {
             } finally {
-                //HttpURLConnectionオブジェクトがnullでないなら解放。
                 if (con != null) {
                     con.disconnect();
                 }
-                //InputStreamオブジェクトがnullでないなら解放。
                 if (is != null) {
                     try {
                         is.close();
@@ -124,7 +115,6 @@ public class WeatherInfoActivity extends AppCompatActivity {
                 }
             }
 
-            //JSON文字列を返す。
             return result;
         }
 
